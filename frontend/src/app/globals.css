@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-parchment text-ink antialiased;
+  }
+
+  h1, h2, h3 {
+    @apply font-display text-ink;
+  }
+
+  a {
+    @apply underline decoration-hairline decoration-1 underline-offset-2 hover:decoration-ink transition-colors;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme("colors.gold.DEFAULT");
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: theme("colors.gold.DEFAULT");
+    color: theme("colors.parchment.paper");
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-parchment-paper border border-hairline rounded-sm;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-ink text-parchment-paper px-5 py-2.5 rounded-sm font-sans text-sm font-medium hover:bg-ink/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-ink/30 text-ink px-5 py-2.5 rounded-sm font-sans text-sm font-medium hover:border-ink hover:bg-ink/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .field-label {
+    @apply block font-sans text-sm text-ink-muted mb-2;
+  }
+
+  .field-input {
+    @apply w-full bg-parchment-paper border border-hairline rounded-sm px-4 py-3 font-sans text-ink placeholder:text-ink-faint focus:border-ink outline-none transition-colors;
+  }
+}
