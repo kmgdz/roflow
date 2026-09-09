@@ -41,6 +41,42 @@ export function resetBurnerAccount() {
   }
 }
 
+const STUDIONET_CHAIN_ID_HEX = "0xF22F"; // 61999 in hex
+
+const STUDIONET_PARAMS = {
+  chainId: STUDIONET_CHAIN_ID_HEX,
+  chainName: "GenLayer Studionet",
+  nativeCurrency: { name: "GEN", symbol: "GEN", decimals: 18 },
+  rpcUrls: ["https://studio.genlayer.com/api"],
+  blockExplorerUrls: ["https://explorer-studio.genlayer.com"],
+};
+
+async function ensureStudionet(provider: EthereumProvider): Promise<void> {
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: STUDIONET_CHAIN_ID_HEX }],
+    });
+  } catch (err) {
+    // 4902 = chain not added to the wallet yet. Add it, then switching
+    // happens automatically as part of wallet_addEthereumChain.
+    const code = (err as { code?: number })?.code;
+    if (code === 4902) {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [STUDIONET_PARAMS],
+      });
+    } else {
+      // Any other error (user rejected, unsupported method, etc.) is
+      // non-fatal here — genlayer-js's own chain check is skipped for
+      // Studio-based chains anyway, so a failed switch just means the
+      // person's wallet UI won't show "GenLayer Studionet" as the active
+      // network, not that transactions will actually fail.
+      throw err;
+    }
+  }
+}
+
 /**
  * Real wallet connect (MetaMask, Rabby, or any injected EIP-1193 provider).
  *
@@ -59,6 +95,14 @@ export async function connectExternalWallet(): Promise<string> {
   if (!accounts || accounts.length === 0) {
     throw new Error("No account was returned by the wallet.");
   }
+
+  try {
+    await ensureStudionet(provider);
+  } catch {
+    // Don't block connecting just because the network switch prompt was
+    // dismissed or unsupported — the wallet still works for signing.
+  }
+
   window.localStorage.setItem(EXTERNAL_WALLET_KEY, accounts[0]);
   return accounts[0];
 }
